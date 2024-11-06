@@ -4,7 +4,15 @@
 
 %% Ejercicio 1
 %% proceso(+P)
-proceso(_).
+% acciones basicas:
+proceso(computar).
+proceso(escribir(B,E)).
+proceso(leer(B)).
+
+%procesos que pueden incluir varias acciones (es decir que tanto p como q sean procesos):
+proceso(secuencia(P, Q)) :- proceso(P), proceso(Q).
+
+proceso(paralelo(P, Q)) :- proceso(P), proceso(Q).
 
 %% Ejercicio 2
 %% buffersUsados(+P,-BS)
