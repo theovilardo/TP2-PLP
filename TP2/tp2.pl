@@ -4,8 +4,6 @@
 
 %% Ejercicio 1
 %% proceso(+P)
-proceso(ricardo).
-proceso(roberto).
 proceso(_).
 
 %% Ejercicio 2
