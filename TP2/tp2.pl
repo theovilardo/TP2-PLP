@@ -46,7 +46,9 @@ notElem(E, [X|XS]) :- E \= X, notElem(E, XS).
 
 %% Ejercicio 3
 %% intercalar(+XS,+YS,?ZS)
-intercalar(_,_,_).
+intercalar([], [], []).
+intercalar([X|XS],YS,[X|ZS]) :- intercalar(XS, YS, ZS).
+intercalar(XS,[Y|YS],[Y|ZS]) :- intercalar(XS, YS, ZS).
 
 %% Ejercicio 4
 %% serializar(+P,?XS)
