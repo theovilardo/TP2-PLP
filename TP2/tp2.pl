@@ -42,8 +42,8 @@ intercalar(XS,[Y|YS],[Y|ZS]) :- intercalar(XS, YS, ZS).
 serializar(computar, [computar]).
 serializar(leer(B), [leer(B)]).
 serializar(escribir(B,E),[escribir(B,E)]).
-serializar(secuencia(P,Q),XS) :- serializar(P,XS1), serializar(Q, XS2), append(XS1, XS2, XS).
-serializar(paralelo(P,Q),XS) :- serializar(P,XS1), serializar(Q, XS2), append(XS1, XS2, XS).
+serializar(secuencia(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, YS, ZS).
+serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, YS, ZS).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
