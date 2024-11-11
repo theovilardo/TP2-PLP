@@ -15,30 +15,17 @@ proceso(secuencia(P, Q)) :- proceso(P), proceso(Q).
 proceso(paralelo(P, Q)) :- proceso(P), proceso(Q).
 
 %% Ejercicio 2
-% deberia appendear los buffers B al final porque son lo mas bajo de la recursion, BS: Lista de buffers
-%% buffersUsados(+P,-BS) ---> Estado actual: funciona pero puede tener errores el eliminaRepetidos porque aveces la lista de salida no respeta el orden
-buffersUsados(computar, []).
+%% buffersUsados(+P,-BS)
 buffersUsados(escribir(B,E), [B]).
 buffersUsados(leer(B), [B]).
 buffersUsados(secuencia(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), eliminaRepetidos(B, BS).
 buffersUsados(paralelo(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), eliminaRepetidos(B, BS).
 
 %predicados extra:
-
-%eliminaRepetidos(+E, -L) (LSR: Lista Sin Repetidos) ---> Estado: funciona pero aveces no respeta el orden de los elementos en la lista de salida.
+%eliminaRepetidos(+E, -L)
 eliminaRepetidos([], []).
-eliminaRepetidos([X|XS], [X|LSR]) :- notElem(X, XS), eliminaRepetidos(XS, LSR).
-eliminaRepetidos([X|XS], LSR) :- elem(X, XS), eliminaRepetidos(XS, LSR).
-%eliminaRepetidos([X|XS], [X|LSR]) :- 
-
-%elem(+E, +L) ambos parametros van instanciados
-elem(E, [E | _]) :- !. % tambien se puede hacer con el fail.
-elem(E, [_ | C]) :- elem(E, C).
-
-%% notElem(+E, +L) ambos parametros van instanciados (como no se hacer el not direcamente hago una version negada del pred elem)
-notElem(_, []).
-notElem(E, [X|XS]) :- E \= X, notElem(E, XS).
-
+eliminaRepetidos([X|XS], [X|LSR]) :- not(member(X, XS)), eliminaRepetidos(XS, LSR).
+eliminaRepetidos([X|XS], LSR) :- member(X, XS), eliminaRepetidos(X, LSR).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Organización de procesos %%
