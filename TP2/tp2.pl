@@ -39,7 +39,12 @@ intercalar(XS,[Y|YS],[Y|ZS]) :- intercalar(XS, YS, ZS).
 
 %% Ejercicio 4
 %% serializar(+P,?XS)
-serializar(_,_).
+serializar(computar, [computar]).
+serializar(leer(B), [leer(B)]).
+serializar(escribir(B,E),[escribir(B,E)]).
+serializar(secuencia(P,Q),XS) :- serializar(P,XS1), serializar(Q, XS2), append(XS1, XS2, XS).
+serializar(paralelo(P,Q),XS) :- serializar(P,XS1), serializar(Q, XS2), append(XS1, XS2, XS).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Contenido de los buffers %%
