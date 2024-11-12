@@ -52,8 +52,17 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, 
 
 %% Ejercicio 5
 %% contenidoBuffer(+B,+ProcesoOLista,?Contenidos)
-contenidoBuffer(_,_,_).
+contenidoBuffer(_, [], []).
+%contenidoBuffer(_, [leer(_)|XS], []) :- contenidoBuffer(_, [], []), 'Buffer invalido'.            %Revisar, caso hay leer invalido
+contenidoBuffer(B, [computar|XS], L) :- contenidoBuffer(B, XS, L).
+%contenidoBuffer(B, [leer(B)|XS], L) :- eliminarPrimerElemento(LS, L), contenidoBuffer(B, XS, LS). %Revisar, eliminar primer elemento no elimina
+%contenidoBuffer(B, [leer(B)|XS], [_|LS]) :- contenidoBuffer(B, XS, LS)                            %Revisar, eliminar primer elemento no elimina
+contenidoBuffer(B, [leer(_)|XS], L) :- contenidoBuffer(B, XS, L).
+contenidoBuffer(B, [escribir(B, E)|XS], [E|LS]) :- contenidoBuffer(B, XS, LS).
+contenidoBuffer(B, [escribir(_, _)|XS], L) :- contenidoBuffer(B, XS, L).
 
+%eliminarPrimerElemento(+L, ?LS)
+eliminarPrimerElemento([_|XS], XS).
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista,?Contenidos)
