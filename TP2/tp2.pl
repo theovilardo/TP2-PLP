@@ -53,16 +53,13 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, 
 %% Ejercicio 5
 %% contenidoBuffer(+B,+ProcesoOLista,?Contenidos)
 contenidoBuffer(_, [], []).
-%contenidoBuffer(_, [leer(X)|XS], []) :- 'Buffer invalido'.            %Revisar, caso hay leer invalido
+%contenidoBuffer(_, [leer(_)|XS], []) :- 'Buffer invalido'.                                        %Revisar, caso hay leer invalido, no sabemos como hacer que corte
 contenidoBuffer(B, [computar|XS], L) :- contenidoBuffer(B, XS, L).
-%contenidoBuffer(B, [leer(B)|XS], L) :- eliminarPrimerElemento(LS, L), contenidoBuffer(B, XS, LS). %Revisar, eliminar primer elemento no elimina
-%contenidoBuffer(B, [leer(B)|XS], [_|LS]) :- contenidoBuffer(B, XS, LS).                            %Revisar, eliminar primer elemento no elimina
-contenidoBuffer(B, [leer(X)|XS], L) :- contenidoBuffer(B, XS, L).
+%contenidoBuffer(B, [leer(B)|XS], LS) :- eliminarPrimerElemento(LS, L), contenidoBuffer(B, XS, L). %Revisar, eliminar primer elemento no funciona
+contenidoBuffer(B, [leer(B)|XS], [L|LS]) :- contenidoBuffer(B, XS, LS).                            %Ambas lineas se comportan de igual manera
+contenidoBuffer(B, [leer(X)|XS], L) :- not(B = X), contenidoBuffer(B, XS, L).                      %No sabemos si es correcto  not(B = X), pero B /= X no anda
 contenidoBuffer(B, [escribir(B, E)|XS], [E|LS]) :- contenidoBuffer(B, XS, LS).
-contenidoBuffer(B, [escribir(X, _)|XS], L) :- contenidoBuffer(B, XS, L).
-
-%eliminarPrimerElemento(+L, ?LS)
-eliminarPrimerElemento([_|XS], XS).
+contenidoBuffer(B, [escribir(X, _)|XS], L) :- not(B = X), contenidoBuffer(B, XS, L).               %No sabemos si es correcto  not(B = X), pero B /= X no anda
 
 %eliminarPrimerElemento(+L, ?LS)
 eliminarPrimerElemento([_|XS], XS).
