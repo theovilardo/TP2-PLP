@@ -52,12 +52,12 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(
 
 %% Ejercicio 5
 %% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
-contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS). %primero convierte la entrada a lista si es proceso, despues llena con las escrituras, y despues aplica las lecturas
+contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
 
 
 %procesarEntrada(+ProcesoOLista, +ListaProcesos)
 %puede que necesite cut para evitar que entre a las dos ramas
-procesarEntrada(POL, LPS) :- esLista(POL), LPS = POL.   % si es lista unifica ListaProcesos con ProcesoOLista (si es lista va a poder unificar)
+procesarEntrada(POL, POL) :- esLista(POL).   % si es lista unifica ListaProcesos con ProcesoOLista (si es lista va a poder unificar)
 procesarEntrada(POL, LPS) :- serializar(POL, LPS).      % si no es lista serializa y devuelve la lista. NOTA: en el caos de ser un paralelo no repite las soluciones como en los ejemplos, no se si esta bien o no
 
 %% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
