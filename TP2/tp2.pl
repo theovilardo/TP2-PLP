@@ -43,7 +43,7 @@ serializar(computar, [computar]).
 serializar(leer(B), [leer(B)]).
 serializar(escribir(B,E),[escribir(B,E)]).
 serializar(secuencia(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, YS, ZS).
-serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, YS, ZS).
+serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(XS, YS, ZS).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
