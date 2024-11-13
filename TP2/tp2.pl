@@ -52,7 +52,7 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, 
 
 %% Ejercicio 5
 %% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
-contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
+contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS). %primero convierte la entrada a lista si es proceso, despues llena con las escrituras, y despues aplica las lecturas
 
 
 %procesarEntrada(+ProcesoOLista, +ListaProcesos)
