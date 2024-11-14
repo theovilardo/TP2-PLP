@@ -89,6 +89,18 @@ contenidoLeido(_,_).
 
 %% Ejercicio 7
 %% esSeguro(+P)
+esSeguro(secuencia(P,Q)) :- P = paralelo(_,_), esUnParaleloSeguro(P), esSeguro(Q).
+esSeguro(P) :- P = paralelo(_,_), esUnParaleloSeguro(P).
+
+esSeguro(P) :- P \= paralelo(_,_), serializar(P, LP), reverse(LP,LPR), esSeguro(LPR).
+esSeguro([]).
+esSeguro([computar|LP]) :- esSeguro(LP).
+esSeguro([escribir(_,_)]) :- esSeguro(LP).
+esSeguro([leer(B)|LP]) :- member(escribir(B, _), LP).
+
+%Aux:
+esUnParaleloSeguro(paralelo(P,Q)):- buffersUsados(P,PS), buffersUsados(Q, QS), interseccionVacia(PS, QS).
+
 
 %% Ejercicio 8
 %% ejecucionSegura( XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
