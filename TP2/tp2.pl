@@ -109,19 +109,21 @@ leerBuffer(BID, [XBC|REG], E, [XBC|NB]) :- XBC = (XID,_), BID \= XID, leerBuffer
 
 %% Ejercicio 7
 %% esSeguro(+P)
-esSeguro(secuencia(P,Q)) :- P = paralelo(_,_), esUnParaleloSeguro(P), esSeguro(Q).
-esSeguro(P) :- P = paralelo(_,_), esUnParaleloSeguro(P).
+
+esSeguro(secuencia(P,Q)) :-  esSeguro(P), esSeguro(Q).
+esSeguro(paralelo(P,Q)) :- esUnParaleloSeguro(paralelo(P,Q)), esSeguro(P), esSeguro(Q).
 
 esSeguro(P) :- P \= paralelo(_,_), serializar(P, LP), reverse(LP,LPR), esSeguro(LPR).
 esSeguro([]).
 esSeguro([computar|LP]) :- esSeguro(LP).
-esSeguro([escribir(_,_)]) :- esSeguro(LP).
+esSeguro([escribir(_,_)|LP]) :- esSeguro(LP).
 esSeguro([leer(B)|LP]) :- member(escribir(B, _), LP).
 
 %Aux:
-
+%esUnPareleloSeguro(+P)
 esUnParaleloSeguro(paralelo(P,Q)):- buffersUsados(P,PS), buffersUsados(Q, QS), interseccionVacia(PS, QS).
 
+% interseccionVacia(+L1, +L2) es verdadero si L1 y L2 no tienen elementos en común
 interseccionVacia([], _).
 interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
 
