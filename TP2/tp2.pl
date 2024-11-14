@@ -54,20 +54,17 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(
 %% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
 contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
 
-
-%procesarEntrada(+ProcesoOLista, +ListaProcesos)
+%procesarEntrada(+ProcesoOLista, -ListaProcesos)
 %puede que necesite cut para evitar que entre a las dos ramas
-procesarEntrada(POL, POL) :- esLista(POL).   % si es lista unifica ListaProcesos con ProcesoOLista (si es lista va a poder unificar)
-procesarEntrada(POL, LPS) :- serializar(POL, LPS).      % si no es lista serializa y devuelve la lista. NOTA: en el caos de ser un paralelo no repite las soluciones como en los ejemplos, no se si esta bien o no
+procesarEntrada(POL, POL).                                       % si no es proceso devuelve la serialización
+procesarEntrada(POL, LP) :- proceso(POL), serializar(POL, PL).   % si es proceso serializa y la devuelve
 
 %% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
 contenidoBufferLista(_, [], []).                                                                  % caso base, si no hya escrituras sale vacio
 contenidoBufferLista(B, [computar | XS], LS) :- contenidoBufferLista(B, XS, LS).                  % computar se ignora
 contenidoBufferLista(B, [escribir(B, E) | XS], [E | LS]) :- contenidoBufferLista(B, XS, LS).      % si escribe el buffer consultado se agrega a la lista de salida (COntenidosLista)
 contenidoBufferLista(B, [escribir(XB, _) | XS], LS) :- B \= XB, contenidoBufferLista(B, XS, LS).  % si escribe en otro buffer se ignora
-%NOTA: estoy seguro que los casos de leer pueden ser uno solo que ignore todas las lecturas
-contenidoBufferLista(B, [leer(B) | XS], LS) :- contenidoBufferLista(B, XS, LS).                   % si lee el buffer consultado se ignora
-contenidoBufferLista(B, [leer(XB) | XS], LS) :- B \= XB, contenidoBufferLista(B, XS, LS).         % si lee otro buffer tambien se ignora
+contenidoBufferLista(B, [leer(_) | XS], LS) :- contenidoBufferLista(B, XS, LS).                   % las lecturas se ignoran
 
 %% procesarLecturas(+B, +ListaProcesos, +ContenidosEntrada, ?ContenidosSalida)
 procesarLecturas(_, [], CE, CE).                                                            % caso base lista vacia, sale la misma
@@ -76,10 +73,16 @@ procesarLecturas(B, [leer(B) | XS], [C | CE], CS) :- procesarLecturas(B, XS, CE,
 procesarLecturas(B, [leer(XB) | XS], CE, CS) :- B \= XB, procesarLecturas(B, XS, CE, CS).   % si lee otro buffer se ignora
 procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE, CS).       % las escrituras se ignoran
 
-% Predicado para verificar si una entrada es una lista
-esLista([]). %no se si [_|_] ya lo cubre
-esLista([_]). % puede que no haga falta pq "_" puede ser vacio en el otro caso
-esLista([_|_]).
+%% Version sin funciones auxiliares (consultar uso de reverse)
+%% contenidoBuffer(+B,+ProcesoOLista,?Contenidos)
+%contenidoBuffer(B, P, _) :- proceso(P), serializar(P, PS), contenidoBuffer(B, PS, C). %Si es proceso, lo serializo
+%contenidoBuffer(B, L, []) :- reverse(L, PR), contenidoBuffer(B, LR, ). %Cuando esta serializado, lo invierto
+%contenidoBuffer(_, [], []). %Caso base
+%contenidoBuffer(B, [computar|XS], C) :- contenidoBuffer(B, XS, C). %Computar se ignora
+%contenidoBuffer(B, [escribir(B, E)|XS], [E|CS]) :- contenidoBuffer(B, XS, CS). %La lista resultante debe tener lo escrito en el buffer
+%contenidoBuffer(B, [escribir(X, _)|XS], C) :- B \= X, contenidoBuffer(B, XS, C). %Ignoro las escrituras a otros buffers
+%contenidoBuffer(B, [leer(B)|XS], C) :- member(escribir(B, _), XS), contenidoBuffer(B, XS, C). %Leer
+%contenidoBuffer(B, [leer(_)|XS], C) :- contenidoBuffer(B, XS, C). %Ignoro las lecturas a otros buffers
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista,?Contenidos)
