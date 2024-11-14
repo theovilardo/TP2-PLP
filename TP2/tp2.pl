@@ -57,7 +57,7 @@ contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, 
 %procesarEntrada(+ProcesoOLista, -ListaProcesos)
 %puede que necesite cut para evitar que entre a las dos ramas
 procesarEntrada(POL, POL).                                       % si no es proceso devuelve la serialización
-procesarEntrada(POL, LP) :- proceso(POL), serializar(POL, PL).   % si es proceso serializa y la devuelve
+procesarEntrada(POL, PL) :- proceso(POL), serializar(POL, PL).   % si es proceso serializa y la devuelve
 
 %% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
 contenidoBufferLista(_, [], []).                                                                  % caso base, si no hya escrituras sale vacio
