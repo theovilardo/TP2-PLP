@@ -18,14 +18,8 @@ proceso(paralelo(P, Q)) :- proceso(P), proceso(Q).
 %% buffersUsados(+P,-BS)
 buffersUsados(escribir(B,E), [B]).
 buffersUsados(leer(B), [B]).
-buffersUsados(secuencia(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), eliminaRepetidos(B, BS).
-buffersUsados(paralelo(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), eliminaRepetidos(B, BS).
-
-%predicados extra:
-%eliminaRepetidos(+E, -L)
-eliminaRepetidos([], []).
-eliminaRepetidos([X|XS], [X|LSR]) :- not(member(X, XS)), eliminaRepetidos(XS, LSR).
-eliminaRepetidos([X|XS], LSR) :- member(X, XS), eliminaRepetidos(X, LSR).
+buffersUsados(secuencia(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), setof(X, member(X, B), BS).
+buffersUsados(paralelo(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), setof(X, member(X, B), BS).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Organización de procesos %%
