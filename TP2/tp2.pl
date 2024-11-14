@@ -80,7 +80,27 @@ procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE,
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista,?Contenidos)
-contenidoLeido(_,_).
+contenidoLeido(POL, CS) :- proceso(POL), serializar(POL, LPS), obtenerLeidos(LPS, [], [], CS). %si es proceso, se serializa
+contenidoLeido(POL, CS) :- obtenerLeidos(POL, [], [], CS). % si no es proceso es lista y sigue
+
+% obtenerLeidos(+ListaProcesos, +Buffers, +Leidos, ?ContenidosSalida)
+% BS = Buffers ---> [(BufferID, Escritura)]
+% BID: Banco interamericano de Desarrollo... mentira es BufferID, 
+obtenerLeidos([], _, L, L).                                                                                                   % caso base (termina de dvolver los leidos post recursion)
+obtenerLeidos([computar|LPS], BS, L, CS) :- obtenerLeidos(LPS, BS, L, CS).                                                    % ignora computar
+obtenerLeidos([escribir(BID, E)|LPS], BS, L, CS) :- agregarBuffer(BID, E, BS, NB), obtenerLeidos(LPS, NB, L, CS).             % si es una escritura agrego el escrito al contenido asociando con su buffer respectivo
+obtenerLeidos([leer(BID)|LPS], BS, L, CS) :- leerBuffer(BID, BS, E, NB), append(L, [E], NL), obtenerLeidos(LPS, NB, NL, CS).  % si es una lectura, se lee el contenido con leerBuffer y appendeo a los leidos dando los nuevos leidos y despues se llama a recursion de obtenerLeidos con los nuevos leidos
+
+% agregarBuffer(+BufferID, +Escritura, +BufferReg, -NuevosBuffers)
+% si pido BufferContenido = (ID, Escritura) ---> IDs de los buffers con esa Escritura
+% XBC: XBufferContenido, CE: ContenidoEscrito, NCE: NuevoContenidoEscrito, REG: Registro (contnido que sigue), NR: NuevoRegistro
+agregarBuffer(BID, E, [(BID,CE)|REG], [(BID,NCE)|REG]) :- append(CE, [E], NCE).                           % si el ID del buffer coincide con la escritura, se agrega al contenido de ese buffer
+agregarBuffer(BID, E, [XBC|REG], [XBC|NR]) :- XBC = (XID,_), BID \= XID, agregarBuffer(BID, E, REG, NR).  % si el ID del buffer no coincide (no unifica) con el ID de la escritura no modifica el contenido
+agregarBuffer(BID, E, [], [(BID,[E])]).                                                                   % si el REG esta vacio es que todavia no fue escrito y se inserta el buffer con su ID y Contenido (no esoty seguro si deberia ir primero)
+
+% leerBuffer(+BufferID, +Buffers, -Escritura, -NuevosBuffers)
+leerBuffer(BID, [(BID,[E|REG])|BS], E, [(BID,REG)|BS]).                                               % si el ID del buffer del registro coincide con el de la lectura, se desencola un elemento dle contenido de ese buffer
+leerBuffer(BID, [XBC|REG], E, [XBC|NB]) :- XBC = (XID,_), BID \= XID, leerBuffer(BID, REG, E, NB).    % si el ID no coincide, no modifico el contenido
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
