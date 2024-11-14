@@ -119,7 +119,11 @@ esSeguro([escribir(_,_)]) :- esSeguro(LP).
 esSeguro([leer(B)|LP]) :- member(escribir(B, _), LP).
 
 %Aux:
+
 esUnParaleloSeguro(paralelo(P,Q)):- buffersUsados(P,PS), buffersUsados(Q, QS), interseccionVacia(PS, QS).
+
+interseccionVacia([], _).
+interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
 
 
 %% Ejercicio 8
