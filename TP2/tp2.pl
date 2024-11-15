@@ -132,12 +132,11 @@ interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
 %% ejecucionSegura(-XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
 ejecucionSegura(XS, BS, CS) :- generarEjecuciones(XS, BS, CS), esSeguro(XS).
 
-%generarSecuencia(+Buffers, +Contenidos, ?Procesos)
-generarEjecuciones([], _, _).                                                                 % caso base
-generarEjecuciones([P], BS, CS) :- generarOp(BS, CS, P).                                      % un solo proceso 
+% generarSecuencia(?Procesos, +Buffers, +Contenidos)
+generarEjecuciones([], _, _).                                                                 % caso base 
 generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(BS, CS, P).   % lista de procesos, recursion
 
-%accionValida(+Buffers, +Contenidos, ?Proceso)
+% accionValida(?Proceso, +Buffers, +Contenidos)
 generarOp(_, _, computar).                                              % ignorar computar como siempre
 generarOp(BS, CS, escribir(B, C)) :- member(B, BS), member(C, CS).      % como es una escritura me fijos si esrtan en la lista de buffers y lo mismo con los contenidos
 generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es lectura chequeo que el buffer este en la lista de buffers
