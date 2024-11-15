@@ -129,8 +129,18 @@ interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
 
 
 %% Ejercicio 8
-%% ejecucionSegura( XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
-ejecucionSegura(_,_,_).
+%% ejecucionSegura(-XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
+ejecucionSegura(XS,BS,CS) :- generarEjecuciones(XS,BS,CS), esSeguro(XS).
+
+
+%aux:
+generarEjecuciones([], [], _).
+generarEjecuciones([], _, []).
+generarEjecuciones([O|OS], [B|BF], [C|CS]) :-  generarOp(B, C, O), generarEjecuciones(OS, BF, CS). 
+
+generarOp(_, _, computar).
+generarOp(B, _, leer(B)).
+generarOp(B, C, escribir(B, C)).
 
   %% 8.1. Analizar la reversibilidad de XS, justificando adecuadamente por qué el predicado se comporta como
   %% lo hace.
