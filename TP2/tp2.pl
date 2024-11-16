@@ -80,21 +80,19 @@ procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE,
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista, ?Contenidos)
-contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), reverse(PS, PSR), procesarLecturasR(PSR, CSR), reverse(CSR, CS).      %lo doy vuelta para leer y le vuelvo a dar vuelta para devolver el contenido
+contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), reverse(PS, PSR), aplicarLecturasR(PSR, CSR), reverse(CSR, CS).     %lo doy vuelta para leer y le vuelvo a dar vuelta para devolver el contenido
 
-%obtenerProcesos(+ProcesoOLista, -Procesos)
+% obtenerProcesos(+ProcesoOLista, -Procesos)
 obtenerProcesos(POL, PS) :- proceso(POL), serializar(POL, PS).
 obtenerProcesos(POL, POL).
 
-%procesarLecturasR(+ProcesosReverse, +ProcesosPrevios, -ContenidosReverse)
-procesarLecturasR([], []).                                                                          % caso base
-procesarLecturasR([leer(B)|XS], [E|ES]) :- buscarEscrituras(B, XS, E), procesarLecturasR(XS, ES).   % caso lectura, verifica que haya contenido para leer con buscarEscrituras
-procesarLecturasR([X|XS], ES) :- X \= leer(_), procesarLecturasR(XS, ES).                           % si no es lectura ignoro y sigo buscando (puede ser mas exhaustivo)
+% procesarLecturasR(+ProcesosReverse, -ContenidosReverse)
+aplicarLecturasR([], []).                                                                                       % caso base
+aplicarLecturasR([leer(B)|XS], [E|ES]) :- desencolarEscrituras(B, XS, XSA, E), aplicarLecturasR(XSA, ES).       % caso lectura, verifica que haya contenido para leer con desencolarEscrituras y se agrega a los contenidos leidos
+aplicarLecturasR([X|XS], ES) :- X \= leer(_), aplicarLecturasR(XS, ES).                                         % si no es lectura ignoro el proceso y sigo buscando 
 
-% Buscar la última escritura del buffer consultado por la lectura (si hubo un leer(B) busco escribir(B, _))
-buscarEscrituras(B, [escribir(B, E)|_], E).                                             % si es una escritura y el buffer coincide devuelve el contenido
-buscarEscrituras(B, [escribir(XB, _)|XS], E) :- B \= XB, buscarEscrituras(B, XS, E).    % si es escritura pero el buffer no coincide, no devuelvo su cotenido
-buscarEscrituras(B, [X|XS], E) :- X \= escribir(_, _), buscarEscrituras(B, XS, E).      % si no es escritura ignorar y seguir
+% desencolarEscrituras(+Buffer, +Procesos, -ProcesosActualizados, -Escritura)
+desencolarEscrituras(B, P, PA, E) :- select(escribir(B, E), P, PA).                  % una vez leida la escritura la saco de la lista para que no se vuelva a leer en caso de haber otra lectura anterior, si no hay nada select tira false?
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
