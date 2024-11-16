@@ -144,10 +144,17 @@ generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es 
 
 % Se espera que completen con las subsecciones de tests que crean necesarias, más allá de las puestas en estos ejemplos
 
-cantidadTestsBasicos(2). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsBasicos(10). % Actualizar con la cantidad de tests que entreguen
 testBasico(1) :- proceso(computar).
 testBasico(2) :- proceso(secuencia(escribir(1,pepe),escribir(2,pipo))).
-testBasico(3) :- buffersUsados(escribir(1, hola), [1]).
+testBasico(3) :- proceso(paralelo(escribir(1,hola),leer(2))).
+testBasico(4) :- proceso(secuencia(paralelo(computar,leer(1)),escribir(2,fin))).
+testBasico(5) :- not(proceso(invalido)).
+testBasico(6) :- buffersUsados(escribir(1, hola), [1]).
+testBasico(7) :- buffersUsados(paralelo(escribir(1,hola),escribir(2,chau)), [1,2]).
+testBasico(8) :- buffersUsados(secuencia(escribir(1,hola),escribir(1,chau)), [1]).
+testBasico(9) :- buffersUsados(paralelo(secuencia(escribir(1,hola),leer(2)),escribir(2,chau)), [1,2]).
+testBasico(10) :- buffersUsados(secuencia(paralelo(escribir(1,a),escribir(2,b)),leer(1)), [1,2]).
 % Agregar más tests
 
 cantidadTestsProcesos(0). % Actualizar con la cantidad de tests que entreguen
