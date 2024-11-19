@@ -67,17 +67,6 @@ procesarLecturas(B, [leer(B) | XS], [C | CE], CS) :- procesarLecturas(B, XS, CE,
 procesarLecturas(B, [leer(XB) | XS], CE, CS) :- B \= XB, procesarLecturas(B, XS, CE, CS).   % si lee otro buffer se ignora
 procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE, CS).       % las escrituras se ignoran
 
-%% Version sin funciones auxiliares (consultar uso de reverse)
-%% contenidoBuffer(+B,+ProcesoOLista,?Contenidos)
-%contenidoBuffer(B, P, _) :- proceso(P), serializar(P, PS), contenidoBuffer(B, PS, C). %Si es proceso, lo serializo
-%contenidoBuffer(B, L, []) :- reverse(L, PR), contenidoBuffer(B, LR, ). %Cuando esta serializado, lo invierto
-%contenidoBuffer(_, [], []). %Caso base
-%contenidoBuffer(B, [computar|XS], C) :- contenidoBuffer(B, XS, C). %Computar se ignora
-%contenidoBuffer(B, [escribir(B, E)|XS], [E|CS]) :- contenidoBuffer(B, XS, CS). %La lista resultante debe tener lo escrito en el buffer
-%contenidoBuffer(B, [escribir(X, _)|XS], C) :- B \= X, contenidoBuffer(B, XS, C). %Ignoro las escrituras a otros buffers
-%contenidoBuffer(B, [leer(B)|XS], C) :- member(escribir(B, _), XS), contenidoBuffer(B, XS, C). %Leer
-%contenidoBuffer(B, [leer(_)|XS], C) :- contenidoBuffer(B, XS, C). %Ignoro las lecturas a otros buffers
-
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista, ?Contenidos)
 contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), reverse(PS, PSR), aplicarLecturasR(PSR, CSR), reverse(CSR, CS).     %lo doy vuelta para leer y le vuelvo a dar vuelta para devolver el contenido
@@ -193,7 +182,7 @@ testBuffers(10) :- contenidoLeido(paralelo(escribir(1,a), secuencia(escribir(1,b
 
 % Agregar más tests
 
-cantidadTestsSeguros(7). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsSeguros(6). % Actualizar con la cantidad de tests que entreguen
 % Ejercicio 7
 testSeguros(1) :- esSeguro(secuencia(escribir(1,hola),leer(1))).
 testSeguros(2) :- not(esSeguro(secuencia(leer(1),escribir(1,hola)))).
