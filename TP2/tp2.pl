@@ -136,6 +136,9 @@ generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es 
   %% 8.1. Analizar la reversibilidad de XS, justificando adecuadamente por qué el predicado se comporta como
   %% lo hace.
 
+  %%El predicado es completamente reversible ya que puede no tener ninguna variable instanciada e igualmente genera resultados,
+  %% esto lo podemos ver ya que puede resolver cualquier combinacion de valores,  instanciados o no y cubre todas las combinaciones
+  %% ninguna variable depende de otra ni tampoco el orden de evaluacion afecta entre las variables, por lo que tampoco depende su instanciación de las otras.
 
 
 %%%%%%%%%%%
