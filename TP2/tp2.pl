@@ -54,7 +54,7 @@ procesarEntrada(POL, POL).                                       % si no es proc
 procesarEntrada(POL, PL) :- proceso(POL), serializar(POL, PL).   % si es proceso serializa y la devuelve
 
 %% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
-contenidoBufferLista(_, [], []).                                                                  % caso base, si no hya escrituras sale vacio
+contenidoBufferLista(_, [], []).                                                                  % caso base, si no hay escrituras sale vacio
 contenidoBufferLista(B, [computar | XS], LS) :- contenidoBufferLista(B, XS, LS).                  % computar se ignora
 contenidoBufferLista(B, [escribir(B, E) | XS], [E | LS]) :- contenidoBufferLista(B, XS, LS).      % si escribe el buffer consultado se agrega a la lista de salida (COntenidosLista)
 contenidoBufferLista(B, [escribir(XB, _) | XS], LS) :- B \= XB, contenidoBufferLista(B, XS, LS).  % si escribe en otro buffer se ignora
@@ -81,7 +81,7 @@ aplicarLecturasR([leer(B)|XS], [E|ES]) :- desencolarEscrituras(B, XS, XSA, E), a
 aplicarLecturasR([X|XS], ES) :- X \= leer(_), aplicarLecturasR(XS, ES).                                         % si no es lectura ignoro el proceso y sigo buscando 
 
 % desencolarEscrituras(+Buffer, +Procesos, -ProcesosActualizados, -Escritura)
-desencolarEscrituras(B, P, PA, E) :- select(escribir(B, E), P, PA).                  % una vez leida la escritura la saco de la lista para que no se vuelva a leer en caso de haber otra lectura anterior, si no hay nada select tira false?
+desencolarEscrituras(B, P, PA, E) :- select(escribir(B, E), P, PA).                  % una vez leida la escritura la saco de la lista para que no se vuelva a leer en caso de haber otra lectura anterior
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,7 +113,7 @@ interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
 %% ejecucionSegura(-XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
 ejecucionSegura(XS, BS, CS) :- generarEjecuciones(XS, BS, CS), esSeguro(XS).
 
-% generarSecuencia(?Procesos, +Buffers, +Contenidos)
+% generarEjecuciones(?Procesos, +Buffers, +Contenidos)
 generarEjecuciones([], _, _).                                                                 % caso base 
 generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(BS, CS, P).   % lista de procesos, recursion
 
@@ -137,12 +137,14 @@ generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es 
 % Se espera que completen con las subsecciones de tests que crean necesarias, más allá de las puestas en estos ejemplos
 
 cantidadTestsBasicos(10). % Actualizar con la cantidad de tests que entreguen
+
 % Ejercicio 1
 testBasico(1) :- proceso(computar).
 testBasico(2) :- proceso(secuencia(escribir(1,pepe),escribir(2,pipo))).
 testBasico(3) :- proceso(paralelo(escribir(1,hola),leer(2))).
 testBasico(4) :- proceso(secuencia(paralelo(computar,leer(1)),escribir(2,fin))).
 testBasico(5) :- not(proceso(invalido)).
+
 % Ejerccio 2
 testBasico(6) :- buffersUsados(escribir(1, hola), [1]).
 testBasico(7) :- buffersUsados(paralelo(escribir(1,hola),escribir(2,chau)), [1,2]).
@@ -152,10 +154,12 @@ testBasico(10) :- buffersUsados(secuencia(paralelo(escribir(1,a),escribir(2,b)),
 
 % Agregar más tests
 cantidadTestsProcesos(8). % Actualizar con la cantidad de tests que entreguen
+
 % Ejercicio 3
 testProcesos(1) :- intercalar([1,2],[3,4],TS), member(X,[[1,2,3,4], [1,3,2,4], [1,3,4,2], [3,1,2,4], [3,1,4,2], [3,4,1,2]]), TS = X.
 testProcesos(2) :- intercalar([],[1,2],[1,2]).
 testProcesos(3) :- intercalar([1,2],[3,4,5],TS), member(X,[[1,2,3,4,5], [1,3,2,4,5], [1,3,4,2,5], [1,3,4,5,2], [3,1,2,4,5], [3,1,4,2,5], [3,1,4,5,2], [3,4,1,2,5], [3,4,1,5,2], [3,4,5,1,2]]), TS = X.
+
 % Ejercicio 4
 testProcesos(4) :- serializar(computar, [computar]).
 
@@ -167,12 +171,14 @@ testProcesos(8) :- serializar(paralelo(leer(1),leer(2)),TS), member(X,[[leer(1),
 % Agregar más tests
 
 cantidadTestsBuffers(10). % Actualizar con la cantidad de tests que entreguen
+
 % Ejercicio 5
 testBuffers(1) :- contenidoBuffer(1,[escribir(1,hola),escribir(1,mundo)],[hola,mundo]).
 testBuffers(2) :- contenidoBuffer(1,[escribir(1,hola),leer(1)],[]).
 testBuffers(3) :- contenidoBuffer(2,[escribir(1,hola),escribir(2,mundo)],[mundo]).
 testBuffers(4) :- contenidoBuffer(1,secuencia(escribir(1,hola),leer(1)),[]).
 testBuffers(5) :- contenidoBuffer(1,paralelo(escribir(1,hola),escribir(1,mundo)),TS), member(X,[[hola,mundo],[mundo,hola]]), TS = X.
+
 % Ejercicio 6
 testBuffers(6) :- contenidoLeido([escribir(1,hola),leer(1)],[hola]).
 testBuffers(7) :- contenidoLeido(paralelo(secuencia(escribir(2,sol),leer(2)), secuencia(escribir(1,agua),leer(1))), TS), member(X, [[sol,agua], [sol,agua], [agua,sol], [sol,agua], [agua,sol], [agua,sol]]), TS = X.
@@ -183,6 +189,7 @@ testBuffers(10) :- contenidoLeido(paralelo(escribir(1,a), secuencia(escribir(1,b
 % Agregar más tests
 
 cantidadTestsSeguros(6). % Actualizar con la cantidad de tests que entreguen
+
 % Ejercicio 7
 testSeguros(1) :- esSeguro(secuencia(escribir(1,hola),leer(1))).
 testSeguros(2) :- not(esSeguro(secuencia(leer(1),escribir(1,hola)))).
@@ -190,6 +197,7 @@ testSeguros(3) :- esSeguro(paralelo(escribir(1,hola),escribir(2,mundo))).
 testSeguros(4) :- not(esSeguro(paralelo(escribir(1,hola),leer(1)))).
 testSeguros(5) :- not(esSeguro(secuencia(escribir(1, hola), leer(2)))).
 testSeguros(6) :- esSeguro(secuencia(paralelo(escribir(1,a),escribir(2,b)), paralelo(leer(1),leer(2)))).
+
 % Ejercicio 8
 % Agregar más tests
 
