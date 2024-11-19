@@ -128,7 +128,7 @@ ejecucionSegura(XS, BS, CS) :- generarEjecuciones(XS, BS, CS), esSeguro(XS).
 generarEjecuciones([], _, _).                                                                 % caso base 
 generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(BS, CS, P).   % lista de procesos, recursion
 
-% accionValida(?Proceso, +Buffers, +Contenidos)
+% generarOp(?Proceso, +Buffers, +Contenidos)
 generarOp(_, _, computar).                                              % ignorar computar como siempre
 generarOp(BS, CS, escribir(B, C)) :- member(B, BS), member(C, CS).      % como es una escritura me fijos si esrtan en la lista de buffers y lo mismo con los contenidos
 generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es lectura chequeo que el buffer este en la lista de buffers
@@ -164,15 +164,16 @@ testBasico(10) :- buffersUsados(secuencia(paralelo(escribir(1,a),escribir(2,b)),
 % Agregar más tests
 cantidadTestsProcesos(8). % Actualizar con la cantidad de tests que entreguen
 % Ejercicio 3
-testProcesos(1) :- intercalar([1,2],[3,4],TS), member(TS,[[1,2,3,4], [1,3,2,4], [1,3,4,2], [3,1,2,4], [3,1,4,2], [3,4,1,2]]).
+testProcesos(1) :- intercalar([1,2],[3,4],TS), member(X,[[1,2,3,4], [1,3,2,4], [1,3,4,2], [3,1,2,4], [3,1,4,2], [3,4,1,2]]), TS = X.
 testProcesos(2) :- intercalar([],[1,2],[1,2]).
-testProcesos(3) :- intercalar([1,2],[3,4,5],TS), member(TS,[[1,2,3,4,5], [1,3,2,4,5], [1,3,4,2,5], [1,3,4,5,2], [3,1,2,4,5], [3,1,4,2,5], [3,1,4,5,2], [3,4,1,2,5], [3,4,1,5,2], [3,4,5,1,2]]).
+testProcesos(3) :- intercalar([1,2],[3,4,5],TS), member(X,[[1,2,3,4,5], [1,3,2,4,5], [1,3,4,2,5], [1,3,4,5,2], [3,1,2,4,5], [3,1,4,2,5], [3,1,4,5,2], [3,4,1,2,5], [3,4,1,5,2], [3,4,5,1,2]]), TS = X.
 % Ejercicio 4
 testProcesos(4) :- serializar(computar, [computar]).
+
 testProcesos(5) :- serializar(secuencia(escribir(1,a),leer(1)), [escribir(1,a),leer(1)]).
-testProcesos(6) :- serializar(paralelo(escribir(1,a),escribir(2,b)),TS), member(TS,[[escribir(1,a),escribir(2,b)],[escribir(2,b),escribir(1,a)]]).
-testProcesos(7) :- serializar(secuencia(paralelo(escribir(1,a),escribir(2,b)),leer(1)),TS), member(TS,[[escribir(1,a),escribir(2,b),leer(1)],[escribir(2,b),escribir(1,a),leer(1)]]).
-testProcesos(8) :- serializar(paralelo(leer(1),leer(2)),TS), member(TS,[[leer(1),leer(2)],[leer(2),leer(1)]]).
+testProcesos(6) :- serializar(paralelo(escribir(1,a),escribir(2,b)),TS), member(X,[[escribir(1,a),escribir(2,b)],[escribir(2,b),escribir(1,a)]]), TS = X.
+testProcesos(7) :- serializar(secuencia(paralelo(escribir(1,a),escribir(2,b)),leer(1)),TS), member(X,[[escribir(1,a),escribir(2,b),leer(1)],[escribir(2,b),escribir(1,a),leer(1)]]), TS = X.
+testProcesos(8) :- serializar(paralelo(leer(1),leer(2)),TS), member(X,[[leer(1),leer(2)],[leer(2),leer(1)]]), TS = X.
 
 % Agregar más tests
 
@@ -182,17 +183,17 @@ testBuffers(1) :- contenidoBuffer(1,[escribir(1,hola),escribir(1,mundo)],[hola,m
 testBuffers(2) :- contenidoBuffer(1,[escribir(1,hola),leer(1)],[]).
 testBuffers(3) :- contenidoBuffer(2,[escribir(1,hola),escribir(2,mundo)],[mundo]).
 testBuffers(4) :- contenidoBuffer(1,secuencia(escribir(1,hola),leer(1)),[]).
-testBuffers(5) :- contenidoBuffer(1,paralelo(escribir(1,hola),escribir(1,mundo)),TS), member(TS,[[hola,mundo],[mundo,hola]]).
+testBuffers(5) :- contenidoBuffer(1,paralelo(escribir(1,hola),escribir(1,mundo)),TS), member(X,[[hola,mundo],[mundo,hola]]), TS = X.
 % Ejercicio 6
 testBuffers(6) :- contenidoLeido([escribir(1,hola),leer(1)],[hola]).
-testBuffers(7) :- contenidoLeido(paralelo(secuencia(escribir(2,sol),leer(2)), secuencia(escribir(1,agua),leer(1))), TS), member(TS, [[sol,agua], [sol,agua], [agua,sol], [sol,agua], [agua,sol], [agua,sol]]).
+testBuffers(7) :- contenidoLeido(paralelo(secuencia(escribir(2,sol),leer(2)), secuencia(escribir(1,agua),leer(1))), TS), member(X, [[sol,agua], [sol,agua], [agua,sol], [sol,agua], [agua,sol], [agua,sol]]), TS = X.
 testBuffers(8) :- contenidoLeido(secuencia(escribir(1,hola),leer(1)),[hola]).
-testBuffers(9) :- contenidoLeido(paralelo(secuencia(escribir(1,a),leer(1)), secuencia(escribir(2,b),leer(2))),TS), member(TS,[[a,b],[b,a]]).
-testBuffers(10) :- contenidoLeido(paralelo(escribir(1,a), secuencia(escribir(1,b),leer(1))),TS), member(TS,[[a],[b]]).
+testBuffers(9) :- contenidoLeido(paralelo(secuencia(escribir(1,a),leer(1)), secuencia(escribir(2,b),leer(2))),TS), member(X,[[a,b],[b,a]]), TS = X.
+testBuffers(10) :- contenidoLeido(paralelo(escribir(1,a), secuencia(escribir(1,b),leer(1))),TS), member(X,[[a],[b]]), TS = X.
 
 % Agregar más tests
 
-cantidadTestsSeguros(6). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsSeguros(7). % Actualizar con la cantidad de tests que entreguen
 % Ejercicio 7
 testSeguros(1) :- esSeguro(secuencia(escribir(1,hola),leer(1))).
 testSeguros(2) :- not(esSeguro(secuencia(leer(1),escribir(1,hola)))).
