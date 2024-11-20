@@ -114,8 +114,8 @@ generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(
 
 % generarOp(?Proceso, +Buffers, +Contenidos)
 generarOp(_, _, computar).                                              % ignorar computar como siempre
-generarOp(BS, CS, escribir(B, C)) :- member(B, BS), member(C, CS).      % como es una escritura me fijos si esrtan en la lista de buffers y lo mismo con los contenidos
-generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es lectura chequeo que el buffer este en la lista de buffers
+generarOp(BS, CS, escribir(B, C)) :- member(B, BS), member(C, CS).      % como es una escritura nos fijamos si estan en la lista de buffers y lo mismo con los contenidos
+generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es lectura chequeamos que el buffer este en la lista de buffers
 
   %% 8.1. Analizar la reversibilidad de XS, justificando adecuadamente por qué el predicado se comporta como
   %% lo hace.
