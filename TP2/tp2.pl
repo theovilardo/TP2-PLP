@@ -46,12 +46,11 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(
 
 %% Ejercicio 5
 %% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
-contenidoBuffer(B, POL, CS) :- procesarEntrada(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
+contenidoBuffer(B, POL, CS) :- obtenerProcesos(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
 
-%procesarEntrada(+ProcesoOLista, -ListaProcesos)
-%puede que necesite cut para evitar que entre a las dos ramas
-procesarEntrada(POL, POL).                                       % si no es proceso devuelve la serialización
-procesarEntrada(POL, PL) :- proceso(POL), serializar(POL, PL).   % si es proceso serializa y la devuelve
+% obtenerProcesos(+ProcesoOLista, -Procesos)
+obtenerProcesos(POL, PS) :- proceso(POL), serializar(POL, PS).
+obtenerProcesos(POL, POL).
 
 %% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
 contenidoBufferLista(_, [], []).                                                                  % caso base, si no hay escrituras sale vacio
@@ -70,10 +69,6 @@ procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE,
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista, ?Contenidos)
 contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), reverse(PS, PSR), aplicarLecturasR(PSR, CSR), reverse(CSR, CS).     %lo doy vuelta para leer y le vuelvo a dar vuelta para devolver el contenido
-
-% obtenerProcesos(+ProcesoOLista, -Procesos)
-obtenerProcesos(POL, PS) :- proceso(POL), serializar(POL, PS).
-obtenerProcesos(POL, POL).
 
 % procesarLecturasR(+ProcesosReverse, -ContenidosReverse)
 aplicarLecturasR([], []).                                                                                       % caso base
