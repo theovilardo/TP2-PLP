@@ -73,14 +73,6 @@ extraerContenidosLeidos([leer(B)|PSS], CI, [C|CS]) :- select(escribir(B, C), CI,
 extraerContenidosLeidos([escribir(B, C)|PSS], CI, CS) :- extraerContenidosLeidos(PSS, [escribir(B, C)|CI], CS).
 extraerContenidosLeidos([computar|PSS], CI, CS) :- extraerContenidosLeidos(PSS, CI, CS).                %se ignora computar
 
-% procesarLecturasR(+ProcesosReverse, -ContenidosReverse)
-aplicarLecturasR([], []).                                                                                       % caso base
-aplicarLecturasR([leer(B)|XS], [E|ES]) :- desencolarEscrituras(B, XS, XSA, E), aplicarLecturasR(XSA, ES).       % caso lectura, verifica que haya contenido para leer con desencolarEscrituras y se agrega a los contenidos leidos
-aplicarLecturasR([X|XS], ES) :- X \= leer(_), aplicarLecturasR(XS, ES).                                         % si no es lectura ignoro el proceso y sigo buscando 
-
-% desencolarEscrituras(+Buffer, +Procesos, -ProcesosActualizados, -Escritura)
-desencolarEscrituras(B, P, PA, E) :- select(escribir(B, E), P, PA).                  % una vez leida la escritura la saco de la lista para que no se vuelva a leer en caso de haber otra lectura anterior
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Contenido de los buffers %%
