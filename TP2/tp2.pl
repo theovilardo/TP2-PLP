@@ -46,29 +46,32 @@ serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(
 
 %% Ejercicio 5
 %% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
-contenidoBuffer(B, POL, CS) :- obtenerProcesos(POL, P), contenidoBufferLista(B, P, C), procesarLecturas(B, P, C, CS).
+% Predicado para obtener el contenido de un buffer
+contenidoBuffer(B, POL, CS) :- obtenerProcesos(POL, PS), filtrarContenidoBuffer(B, PS, [], CS).
 
 % obtenerProcesos(+ProcesoOLista, -Procesos)
 obtenerProcesos(POL, PS) :- proceso(POL), serializar(POL, PS).
 obtenerProcesos(POL, POL).
 
-%% contenidoBufferLista(+B, +ListaProcesos, ?ContenidosLista) % escribe los contendios del buffer consultado
-contenidoBufferLista(_, [], []).                                                                  % caso base, si no hay escrituras sale vacio
-contenidoBufferLista(B, [computar | XS], LS) :- contenidoBufferLista(B, XS, LS).                  % computar se ignora
-contenidoBufferLista(B, [escribir(B, E) | XS], [E | LS]) :- contenidoBufferLista(B, XS, LS).      % si escribe el buffer consultado se agrega a la lista de salida (COntenidosLista)
-contenidoBufferLista(B, [escribir(XB, _) | XS], LS) :- B \= XB, contenidoBufferLista(B, XS, LS).  % si escribe en otro buffer se ignora
-contenidoBufferLista(B, [leer(_) | XS], LS) :- contenidoBufferLista(B, XS, LS).                   % las lecturas se ignoran
+%filtrarContenidoBuffer(+Buffer, +Procesos, +ContenidosIniciales, -ContenidosSalida)
+filtrarContenidoBuffer(_, [], CI, CI).                                                                                        % caso base (lista de procesos vacia)
+filtrarContenidoBuffer(B, [escribir(B, E)|PSS], CI, CS) :- append(CI, [E], NCI), filtrarContenidoBuffer(B, PSS, NCI, CS).
+filtrarContenidoBuffer(B, [leer(B)|PSS], [_|CIS], CS) :- filtrarContenidoBuffer(B, PSS, CIS, CS).
+filtrarContenidoBuffer(B, [escribir(XB, _)|PSS], CI, CS) :- B \= XB, filtrarContenidoBuffer(B, PSS, CI, CS).
+filtrarContenidoBuffer(B, [leer(XB)|PSS], CI, CS) :- B \= XB, filtrarContenidoBuffer(B, PSS, CI, CS).
+filtrarContenidoBuffer(B, [computar|PSS], CI, CS) :- filtrarContenidoBuffer(B, PSS, CI, CS).
 
-%% procesarLecturas(+B, +ListaProcesos, +ContenidosEntrada, ?ContenidosSalida)
-procesarLecturas(_, [], CE, CE).                                                            % caso base lista vacia, sale la misma
-procesarLecturas(B, [computar | XS], CE, CS) :- procesarLecturas(B, XS, CE, CS).            % computar se ignora
-procesarLecturas(B, [leer(B) | XS], [C | CE], CS) :- procesarLecturas(B, XS, CE, CS).       % si se lee el buffer consultado desencola
-procesarLecturas(B, [leer(XB) | XS], CE, CS) :- B \= XB, procesarLecturas(B, XS, CE, CS).   % si lee otro buffer se ignora
-procesarLecturas(B, [escribir(_,_) | XS], CE, CS) :- procesarLecturas(B, XS, CE, CS).       % las escrituras se ignoran
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista, ?Contenidos)
-contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), reverse(PS, PSR), aplicarLecturasR(PSR, CSR), reverse(CSR, CS).     %lo doy vuelta para leer y le vuelvo a dar vuelta para devolver el contenido
+% Predicado principal para obtener contenidos leídos
+contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), extraerContenidosLeidos(PS, [], CS).
+
+%extraerContenidosLeidos(+Procesos, +ContenidosIniciales, -ContenidosSalida)
+extraerContenidosLeidos([], _, []).             % caso base
+extraerContenidosLeidos([leer(B)|PSS], CI, [C|CS]) :- select(escribir(B, C), CI, NCI), extraerContenidosLeidos(PSS, NCI, CS).
+extraerContenidosLeidos([escribir(B, C)|PSS], CI, CS) :- extraerContenidosLeidos(PSS, [escribir(B, C)|CI], CS).
+extraerContenidosLeidos([computar|PSS], CI, CS) :- extraerContenidosLeidos(PSS, CI, CS).                %se ignora computar
 
 % procesarLecturasR(+ProcesosReverse, -ContenidosReverse)
 aplicarLecturasR([], []).                                                                                       % caso base
