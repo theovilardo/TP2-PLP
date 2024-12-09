@@ -6,20 +6,20 @@
 %% proceso(+P)
 % acciones basicas:
 proceso(computar).
-proceso(escribir(B,E)).
-proceso(leer(B)).
-
-%procesos que pueden incluir varias acciones (es decir que tanto p como q sean procesos):
+proceso(escribir(_,_)).
+proceso(leer(_)).
 proceso(secuencia(P, Q)) :- proceso(P), proceso(Q).
-
 proceso(paralelo(P, Q)) :- proceso(P), proceso(Q).
 
 %% Ejercicio 2
 %% buffersUsados(+P,-BS)
-buffersUsados(escribir(B,E), [B]).
+buffersUsados(computar, []).
+buffersUsados(escribir(B,_), [B]).
 buffersUsados(leer(B), [B]).
-buffersUsados(secuencia(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), setof(X, member(X, B), BS).
-buffersUsados(paralelo(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), setof(X, member(X, B), BS).
+buffersUsados(C, BS) :- C =.. [_, P, Q], buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), sort(B, BS).
+%se puede usar =..?
+%buffersUsados(secuencia(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), sort(B, BS).
+%buffersUsados(paralelo(P, Q), BS) :- buffersUsados(P, B1), buffersUsados(Q, B2), append(B1, B2, B), sort(B, BS).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Organización de procesos %%
@@ -39,40 +39,35 @@ serializar(escribir(B,E),[escribir(B,E)]).
 serializar(secuencia(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), append(XS, YS, ZS).
 serializar(paralelo(P,Q),ZS) :- serializar(P,XS), serializar(Q, YS), intercalar(XS, YS, ZS).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Contenido de los buffers %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Ejercicio 5
-%% contenidoBuffer(+B, +ProcesoOLista, ?Contenidos)
-% Predicado para obtener el contenido de un buffer
-contenidoBuffer(B, POL, CS) :- obtenerProcesos(POL, PS), filtrarContenidoBuffer(B, PS, [], CS).
+%% contenidoBuffer(+B, +ProcesoOLista, ?L)
+contenidoBuffer(B, POL, L) :- procesoALista(POL, PS), procesarLecturas(B, PS, L).
 
-% obtenerProcesos(+ProcesoOLista, -Procesos)
-obtenerProcesos(POL, PS) :- proceso(POL), serializar(POL, PS).
-obtenerProcesos(POL, POL).
+%procesoALista(+ProcesoOLista, -Procesos)
+procesoALista(POL, PS) :- proceso(POL), serializar(POL, PS).
+procesoALista(POL, POL).
 
-%filtrarContenidoBuffer(+Buffer, +Procesos, +ContenidosIniciales, -ContenidosSalida)
-filtrarContenidoBuffer(_, [], CI, CI).                                                                                        % caso base (lista de procesos vacia)
-filtrarContenidoBuffer(B, [escribir(B, E)|PSS], CI, CS) :- append(CI, [E], NCI), filtrarContenidoBuffer(B, PSS, NCI, CS).
-filtrarContenidoBuffer(B, [leer(B)|PSS], [_|CIS], CS) :- filtrarContenidoBuffer(B, PSS, CIS, CS).
-filtrarContenidoBuffer(B, [escribir(XB, _)|PSS], CI, CS) :- B \= XB, filtrarContenidoBuffer(B, PSS, CI, CS).
-filtrarContenidoBuffer(B, [leer(XB)|PSS], CI, CS) :- B \= XB, filtrarContenidoBuffer(B, PSS, CI, CS).
-filtrarContenidoBuffer(B, [computar|PSS], CI, CS) :- filtrarContenidoBuffer(B, PSS, CI, CS).
-
+%procesarLecturas(+B, +PS, -L)
+procesarLecturas(_, [], []).
+procesarLecturas(B, [computar|PS], L) :- procesarLecturas(B, PS, L).
+procesarLecturas(B, [escribir(B,_)|PS], L) :- member(leer(B), PS), select(leer(B), PS, P), procesarLecturas(B, P, L).
+procesarLecturas(B, [escribir(B,E)|PS], [E|L]) :- not(member(leer(B), PS)), procesarLecturas(B, PS, L).
+procesarLecturas(B, [escribir(C,_)|PS], L) :- C \= B, procesarLecturas(B, PS, L).
+procesarLecturas(B, [leer(C)|PS],L) :- C \= B, procesarLecturas(B, PS, L).
 
 %% Ejercicio 6
 %% contenidoLeido(+ProcesoOLista, ?Contenidos)
-% Predicado principal para obtener contenidos leídos
-contenidoLeido(POL, CS) :- obtenerProcesos(POL, PS), extraerContenidosLeidos(PS, [], CS).
+contenidoLeido(POL, L) :- procesoALista(POL, PS), reverse(PS, P), leidos(P, LS), reverse(LS, L).
 
-%extraerContenidosLeidos(+Procesos, +ContenidosIniciales, -ContenidosSalida)
-extraerContenidosLeidos([], _, []).             % caso base
-extraerContenidosLeidos([leer(B)|PSS], CI, [C|CS]) :- select(escribir(B, C), CI, NCI), extraerContenidosLeidos(PSS, NCI, CS).
-extraerContenidosLeidos([escribir(B, C)|PSS], CI, CS) :- extraerContenidosLeidos(PSS, [escribir(B, C)|CI], CS).
-extraerContenidosLeidos([computar|PSS], CI, CS) :- extraerContenidosLeidos(PSS, CI, CS).                %se ignora computar
-
+%leidos(+PS, -L)
+leidos([], []).
+leidos([computar|PS], L) :- leidos(PS, L).
+leidos([escribir(_,_)|PS], L) :- leidos(PS, L).
+leidos([leer(B)|PS], [E|L]) :- member(escribir(B,E), PS), select(escribir(B,E), PS, P), leidos(P, L).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Contenido de los buffers %%
@@ -80,45 +75,34 @@ extraerContenidosLeidos([computar|PSS], CI, CS) :- extraerContenidosLeidos(PSS, 
 
 %% Ejercicio 7
 %% esSeguro(+P)
+esSeguro(paralelo(P,Q)) :- esSeguro(P), esSeguro(Q), buffersUsados(P,PS), buffersUsados(Q, QS), intersection(PS, QS, I), I = [].
+esSeguro(P) :- proceso(P), P \= paralelo(_,_), serializar(P, XS), reverse(XS,XR), listaReverseSegura(XR).
 
-esSeguro(secuencia(P,Q)) :-  esSeguro(P), esSeguro(Q).
-esSeguro(paralelo(P,Q)) :- esUnParaleloSeguro(paralelo(P,Q)), esSeguro(P), esSeguro(Q).
-
-esSeguro(P) :- P \= paralelo(_,_), serializar(P, LP), reverse(LP,LPR), esSeguro(LPR).
-esSeguro([]).
-esSeguro([computar|LP]) :- esSeguro(LP).
-esSeguro([escribir(_,_)|LP]) :- esSeguro(LP).
-esSeguro([leer(B)|LP]) :- member(escribir(B, _), LP).
-
-%Aux:
-%esUnPareleloSeguro(+P)
-esUnParaleloSeguro(paralelo(P,Q)):- buffersUsados(P,PS), buffersUsados(Q, QS), interseccionVacia(PS, QS).
-
-% interseccionVacia(+L1, +L2) es verdadero si L1 y L2 no tienen elementos en común
-interseccionVacia([], _).
-interseccionVacia([X|XS], YS) :- not(member(X, YS)), interseccionVacia(XS, YS).
-
+%listaReverseSegura(+XS)
+listaReverseSegura([]).
+listaReverseSegura([computar|XS]) :- listaReverseSegura(XS).
+listaReverseSegura([escribir(_,_)|XS]) :- listaReverseSegura(XS).
+listaReverseSegura([leer(B)|XS]) :- member(escribir(B,_), XS), select(escribir(B,_), XS, X), listaReverseSegura(X).
 
 %% Ejercicio 8
-%% ejecucionSegura(-XS,+BS,+CS) - COMPLETAR LA INSTANCIACIÓN DE XS
-ejecucionSegura(XS, BS, CS) :- generarEjecuciones(XS, BS, CS), esSeguro(XS).
+%% ejecucionSegura(-XS,+BS,+CS)
+ejecucionSegura(XS, BS, CS) :- generarEjecuciones(XS, BS, CS), reverse(XS, XR), listaReverseSegura(XR).
 
 % generarEjecuciones(?Procesos, +Buffers, +Contenidos)
-generarEjecuciones([], _, _).                                                                 % caso base 
-generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(BS, CS, P).   % lista de procesos, recursion
+generarEjecuciones([], _, _).
+generarEjecuciones([P|PS], BS, CS) :- generarEjecuciones(PS, BS, CS), generarOp(P, BS, CS).
 
 % generarOp(?Proceso, +Buffers, +Contenidos)
-generarOp(_, _, computar).                                              % ignorar computar como siempre
-generarOp(BS, CS, escribir(B, C)) :- member(B, BS), member(C, CS).      % como es una escritura nos fijamos si estan en la lista de buffers y lo mismo con los contenidos
-generarOp(BS, _, leer(B)) :- member(B, BS).                             % si es lectura chequeamos que el buffer este en la lista de buffers
+generarOp(computar, _, _).
+generarOp(escribir(B, C), BS, CS) :- member(B, BS), member(C, CS).
+generarOp(leer(B), BS, _) :- member(B, BS).
 
   %% 8.1. Analizar la reversibilidad de XS, justificando adecuadamente por qué el predicado se comporta como
   %% lo hace.
 
-  %%El predicado es completamente reversible ya que puede no tener ninguna variable instanciada e igualmente genera resultados,
+  %% El predicado es completamente reversible ya que puede no tener ninguna variable instanciada e igualmente genera Rados,
   %% esto lo podemos ver ya que puede resolver cualquier combinacion de valores,  instanciados o no y cubre todas las combinaciones
   %% ninguna variable depende de otra ni tampoco el orden de evaluacion afecta entre las variables, por lo que tampoco depende su instanciación de las otras.
-
 
 %%%%%%%%%%%
 %% TESTS %%
